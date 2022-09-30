@@ -31,13 +31,13 @@ CREATE TABLE "events_table"
     "location"      character varying(max),
     "method"        character varying(32),
     "page"          character varying(max),
-    "registration"  numeric(38, 0),
+    "registration"  character varying(max),
     "sessionId"     character varying(max),
     "song"          character varying(max),
     "status"        integer,
     "ts"            numeric(38, 0),
     "userAgent"     character varying(max),
-    "userId"        integer
+    "userId"        character varying(max)
 );
 """)
 
@@ -60,7 +60,7 @@ CREATE TABLE "songs_table"
 songplay_table_create = ("""
 CREATE TABLE songplays
 (
-    songplay_id int8 identity (0,1)    not null unique,
+    songplay_id int8 identity (0,1)    not null unique distkey,
     start_time  int8 references time,
     user_id     character varying(max) references users,
     level       character varying(max),
@@ -76,7 +76,7 @@ CREATE TABLE songplays
 user_table_create = ("""
 CREATE TABLE users
 (
-    user_id    integer not null unique,
+    user_id    character varying(max) not null unique distkey,
     first_name character varying(max),
     last_name  character varying(max),
     gender     character varying(max),
@@ -88,7 +88,7 @@ CREATE TABLE users
 song_table_create = ("""
 CREATE TABLE songs
 (
-    song_id   character varying(max) not null unique,
+    song_id   character varying(max) not null unique distkey,
     title     character varying(max) not null,
     artist_id character varying(max) not null,
     year      numeric(4, 0),
@@ -100,7 +100,7 @@ CREATE TABLE songs
 artist_table_create = ("""
 CREATE TABLE artists
 (
-    artist_id character varying(max) not null unique,
+    artist_id character varying(max) not null unique distkey,
     name      character varying(max),
     location  character varying(max),
     lattitude double precision,
@@ -112,7 +112,7 @@ CREATE TABLE artists
 time_table_create = ("""
 CREATE TABLE time
 (
-    start_time timestamp     not null unique,
+    start_time timestamp     not null unique distkey,
     hour       numeric(2, 0) not null,
     day        numeric(2, 0) not null,
     week       numeric(2, 0) not null,
@@ -126,12 +126,16 @@ CREATE TABLE time
 # STAGING TABLES
 
 staging_events_copy = ("""
-COPY events_table FROM 's3://udacity-dend/log_data/' credentials 'aws_iam_role={}' FORMAT AS JSON 'auto ignorecase';    
-""").format(config.get("ARN"))
+COPY events_table 
+FROM {} credentials 'aws_iam_role={}' 
+JSON {};    
+""").format(config.get("LOG_DATA"), config.get("ARN"), config.get("LOG_JSONPATH"))
 
 staging_songs_copy = ("""
-COPY songs_table FROM 's3://udacity-dend/song_data/' credentials 'aws_iam_role={}' FORMAT AS JSON 'auto ignorecase';    
-""").format(config.get("ARN"))
+COPY songs_table 
+FROM {} credentials 'aws_iam_role={}' 
+FORMAT AS JSON 'auto ignorecase';    
+""").format(config.get("SONG_DATA"), config.get("ARN"))
 
 # FINAL TABLES
 
@@ -197,14 +201,11 @@ from (SELECT DISTINCT (TIMESTAMP 'epoch' + ts * INTERVAL '0.001 second') as ts f
 """)
 
 # QUERY LISTS
-
-# create_table_queries = [staging_songs_table_create, staging_events_table_create]
-# drop_table_queries = [staging_songs_table_drop, staging_events_table_drop]
-# copy_table_queries = [staging_songs_copy, staging_events_copy]
-# insert_table_queries = []
-create_table_queries = [user_table_create, song_table_create, artist_table_create, time_table_create,
+create_table_queries = [staging_songs_table_create, staging_events_table_create, user_table_create, song_table_create,
+                        artist_table_create, time_table_create,
                         songplay_table_create]
-drop_table_queries = [songplay_table_drop, user_table_drop, song_table_drop, artist_table_drop, time_table_drop]
-copy_table_queries = []
+drop_table_queries = [staging_songs_table_drop, staging_events_table_drop, songplay_table_drop, user_table_drop,
+                      song_table_drop, artist_table_drop, time_table_drop]
+copy_table_queries = [staging_songs_copy, staging_events_copy]
 insert_table_queries = [user_table_insert, song_table_insert, artist_table_insert, time_table_insert,
                         songplay_table_insert]

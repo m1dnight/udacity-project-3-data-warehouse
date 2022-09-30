@@ -81,7 +81,11 @@ def createConfig():
         'DWH_DB_PASSWORD': config.get("DWH", "DWH_DB_PASSWORD"),
         'DWH_PORT': config.get("DWH", "DWH_PORT"),
 
-        'ARN': config.get("IAM_ROLE", "ARN")
+        'ARN': config.get("IAM_ROLE", "ARN"),
+
+        'LOG_DATA': config.get("S3", "LOG_DATA"),
+        'SONG_DATA': config.get("S3", "SONG_DATA"),
+        'LOG_JSONPATH': config.get("S3", "LOG_JSONPATH")
     }
 
 

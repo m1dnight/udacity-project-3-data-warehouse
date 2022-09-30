@@ -11,8 +11,6 @@ def drop_tables(cur, conn):
     The queries are specified in sql_queries.py.
     """
     for query in drop_table_queries:
-        print("Running query:")
-        print(query)
         cur.execute(query)
         conn.commit()
 
@@ -23,8 +21,6 @@ def create_tables(cur, conn):
     The queries are specified in sql_queries.py.
     """
     for query in create_table_queries:
-        print("Running query:")
-        print(query)
         cur.execute(query)
         conn.commit()
 

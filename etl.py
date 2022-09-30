@@ -9,8 +9,6 @@ def load_staging_tables(cur, conn):
     Queries are defined in sql_queries.py.
     """
     for query in copy_table_queries:
-        print("Running query:")
-        print(query)
         cur.execute(query)
         conn.commit()
 
@@ -21,7 +19,6 @@ def insert_tables(cur, conn):
     Queries are defined in sql_queries.py.
     """
     for query in insert_table_queries:
-        print("Running query:")
         print(query)
         cur.execute(query)
         conn.commit()
